@@ -84,19 +84,20 @@ class Solution:
         """
         # return new_image
         """INSERT YOUR CODE HERE"""
+              
         dst_image = np.zeros(dst_image_shape, dtype=src_image.dtype)
         src_image_shape = src_image.shape
-
-        for u in range(src_image_shape[0]):
-            for v in range(src_image_shape[1]):
+        for u in range(src_image.shape[1]): #src_image_shape[0]):#axis 0 represents the height and 1 the width in shape function
+            for v in range(src_image.shape[0]): #src_image_shape[1]):
                 x = np.array([u, v, 1])
-                x_tag = np.dot(homography, x)
-                x_tag = x_tag / x_tag[-1]
+                x_tagg = np.matmul(homography, x)
+                x_tag = x_tagg / x_tagg[-1]
+                [u_tag,v_tag,_] = x_tag
                 u_tag = round(x_tag[0])
                 v_tag = round(x_tag[1])
-                if (0 <= u_tag <= dst_image.shape[0] and 0 <= v_tag <= dst_image.shape[1]):
-                    dst_image[u_tag][v_tag] = src_image[u][v]
-
+                if (0 < u_tag <= dst_image.shape[1] and 0 < v_tag <= dst_image.shape[0]):
+                    dst_image[v_tag][u_tag] = src_image[v][u]  #v rpz row number - u rpz column number
+        
         return dst_image
 
     @staticmethod
