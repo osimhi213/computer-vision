@@ -109,7 +109,8 @@ def main():
     forward_panorama_imperfect_matches_plot = plt.imshow(transformed_image_fast)
     plt.title('Forward Panorama imperfect matches')
     # plt.show()
-
+    plt.savefig('outputs/fast_naive_homography_imperfect.jpeg')
+    exit(0)
     # Test naive homography
     tt = time.time()
     fit_percent, dist_mse = solution.test_homography(naive_homography,
