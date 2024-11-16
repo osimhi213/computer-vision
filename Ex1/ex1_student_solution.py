@@ -179,7 +179,24 @@ class Solution:
         """
         # return fit_percent, dist_mse
         """INSERT YOUR CODE HERE"""
-        pass
+        N = match_p_src.shape[1]
+        z = np.ones((1, N), dtype=match_p_src.dtype)
+        x = np.concatenate((match_p_src, z), axis=0)
+        x_tag = np.dot(homography, x)
+        mapped_p_src = np.round(x_tag / x_tag[-1])[:2].astype(np.int)
+
+        errors = np.linalg.norm(mapped_p_src - match_p_dst, ord=2, axis=0)
+        inliers = errors <= max_err
+        num_of_inliers = np.count_nonzero(inliers)
+        fit_precent = num_of_inliers / N
+
+        if num_of_inliers > 0:
+            inliers_errors = np.linalg.norm((mapped_p_src - match_p_dst)[:, inliers], ord=2, axis=0)
+            dist_mse = np.mean(inliers_errors)
+        else:
+            dist_mse = 1e9
+
+        return fit_precent, dist_mse
 
     @staticmethod
     def meet_the_model_points(homography: np.ndarray,
