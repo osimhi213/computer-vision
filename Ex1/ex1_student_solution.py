@@ -257,21 +257,37 @@ class Solution:
         Returns:
             homography: Projective transformation matrix from src to dst.
         """
-        # # use class notations:
-        # w = inliers_percent
-        # # t = max_err
-        # # p = parameter determining the probability of the algorithm to
-        # # succeed
-        # p = 0.99
-        # # the minimal probability of points which meets with the model
-        # d = 0.5
-        # # number of points sufficient to compute the model
-        # n = 4
-        # # number of RANSAC iterations (+1 to avoid the case where w=1)
-        # k = int(np.ceil(np.log(1 - p) / np.log(1 - w ** n))) + 1
+        # use class notations:
+        w = inliers_percent
+        t = max_err
+        # p = parameter determining the probability of the algorithm to
+        # succeed
+        p = 0.99
+        # the minimal probability of points which meets with the model
+        d = 0.5
+        # number of points sufficient to compute the model
+        n = 4
+        # number of RANSAC iterations (+1 to avoid the case where w=1)
+        k = int(np.ceil(np.log(1 - p) / np.log(1 - w ** n))) + 1
         # return homography
         """INSERT YOUR CODE HERE"""
-        pass
+        N = match_p_src.shape[1]
+        best_dist_mse = np.inf
+        homography = None
+        for i in range(k):
+            choices = np.random.choice(range(N), size=n, replace=False)
+            H = self.compute_homography_naive(match_p_src[:, choices], match_p_dst[:, choices])
+            fit_precent, _ = self.test_homography(H, match_p_src, match_p_dst, t)
+            if fit_precent >= d:
+                mp_src_meets_model, mp_dst_meets_model = self.meet_the_model_points(H, match_p_src, match_p_dst, t)
+                H = self.compute_homography_naive(mp_src_meets_model, mp_dst_meets_model)
+                fit_precent, dist_mse = self.test_homography(H, match_p_src, match_p_dst, t)                    
+
+                if dist_mse < best_dist_mse:
+                    homography = H
+                    best_dist_mse = dist_mse
+
+        return homography
 
     @staticmethod
     def compute_backward_mapping(
