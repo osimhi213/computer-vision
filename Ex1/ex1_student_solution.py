@@ -225,7 +225,19 @@ class Solution:
         """
         # return mp_src_meets_model, mp_dst_meets_model
         """INSERT YOUR CODE HERE"""
-        pass
+        N = match_p_src.shape[1]
+        z = np.ones((1, N), dtype=match_p_src.dtype)
+        x = np.concatenate((match_p_src, z), axis=0)
+        x_tag = np.dot(homography, x)
+        mapped_p_src = np.round(x_tag / x_tag[-1])[:2].astype(np.int)
+
+        errors = np.linalg.norm(mapped_p_src - match_p_dst, ord=2, axis=0)
+        inliers = errors <= max_err
+        
+        mp_src_meets_model = match_p_src[:, inliers]
+        mp_dst_meets_model = match_p_dst[:, inliers]
+
+        return mp_src_meets_model, mp_dst_meets_model
 
     def compute_homography(self,
                            match_p_src: np.ndarray,
