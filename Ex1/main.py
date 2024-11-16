@@ -68,9 +68,9 @@ def main():
     plt.figure()
     plt.imshow(transformed_image)
     plt.title('Forward Homography Slow implementation')
-    plt.savefig('outputs/slow_homography.jpeg')
+    plt.savefig('outputs/slow_naive_homography.jpeg')
     plt.show()
-    exit(0)
+
     # Plot naive homography with forward mapping, fast implementation
     tt = time.time()
     transformed_image_fast = solution.compute_forward_homography_fast(
@@ -83,6 +83,7 @@ def main():
     forward_panorama_fast_plot = plt.imshow(transformed_image_fast)
     plt.title('Forward Homography Fast implementation')
     # plt.show()
+    plt.savefig('outputs/fast_naive_homography.jpeg')
 
     # loading data with imperfect matches
     src_img, dst_img, match_p_src, match_p_dst = load_data(False)

@@ -89,9 +89,9 @@ class Solution:
                 x = np.array([u, v, 1])
                 x_tag = np.dot(homography, x)
                 x_tag = x_tag / x_tag[-1]
-                u_tag, v_tag = np.round(x_tag[0:2]).astype(int) # Nearest neighboor
-                if (0 <= u_tag <= w2 and 0 <= v_tag <= h2):
-                    dst_image[v_tag][u_tag] = src_image[v][u]
+                u_tag, v_tag = np.round(x_tag[0:2]).astype(np.int) # Nearest neighboor
+                if (0 <= u_tag < w2 and 0 <= v_tag < h2):
+                    dst_image[v_tag, u_tag, :] = src_image[v, u, :]
 
         return dst_image
 
@@ -124,7 +124,33 @@ class Solution:
         """
         # return new_image
         """INSERT YOUR CODE HERE"""
-        pass
+        dst_image = np.zeros(dst_image_shape, dtype=src_image.dtype)
+        h1, w1 = src_image.shape[:-1]
+        h2, w2 = dst_image.shape[:-1]
+
+        # 1
+        U, V = np.meshgrid(np.arange(w1), np.arange(h1))
+        u = U.reshape(1, -1)
+        v = V.reshape(1, -1)
+        z = np.ones((1, h1 * w1))
+        # 2
+        P = np.concatenate((u, v, z))
+        # 3
+        P_tag = np.dot(homography, P)
+        # 4
+        P_tag = P_tag / P_tag[-1, :]
+        U_tag, V_tag = np.round(P_tag[0:2]).astype(np.int)
+        valid_coords = np.where((U_tag >= 0) & (U_tag < w2) & (V_tag >= 0) & (V_tag < h2))[0]
+        u = u.reshape(-1)[valid_coords]
+        v = v.reshape(-1)[valid_coords]
+        u_tag = U_tag[valid_coords]
+        v_tag = V_tag[valid_coords]
+
+        # 5
+        dst_image[v_tag, u_tag, :] = src_image[v, u, :]
+
+        return dst_image
+
 
     @staticmethod
     def test_homography(homography: np.ndarray,
