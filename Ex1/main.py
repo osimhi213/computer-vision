@@ -51,30 +51,8 @@ def main():
     tt = time.time()
     naive_homography = solution.compute_homography_naive(match_p_src,
                                                          match_p_dst)
-    X = []
-    Y = []
-    X_tag = []
-    Y_tag = []
-    for i in range(match_p_src.shape[1]):
-        u = match_p_src[0][i]
-        v = match_p_src[1][i]
-        X.append(u)
-        Y.append(v)
-        x = np.array([u, v, 1])
-        x_tag = np.dot(naive_homography, x)
-        z_tag = x_tag[-1]
-        x_tag = x_tag / z_tag
-        u_tag, v_tag, _ = x_tag
-        X_tag.append(u_tag)
-        Y_tag.append(v_tag)
     plt.figure()
     plt.imshow(src_img)
-    plt.scatter(X, Y, color='red')
-    plt.savefig('src_with_markdowns.jpg')
-    plt.figure()
-    plt.imshow(dst_img)
-    plt.scatter(X_tag, Y_tag, color='red')
-    plt.savefig('dst_with_markdowns.jpg')
 
     print('Naive Homography {:5.4f} sec'.format(toc(tt)))
     print(naive_homography)
@@ -85,12 +63,12 @@ def main():
         homography=naive_homography,
         src_image=src_img,
         dst_image_shape=dst_img.shape)
+
     print('Naive Homography Slow computation takes {:5.4f} sec'.format(toc(tt)))
     plt.figure()
     plt.imshow(transformed_image)
-    print(transformed_image)
     plt.title('Forward Homography Slow implementation')
-    plt.savefig('slow_homography.jpeg')
+    plt.savefig('outputs/slow_homography.jpeg')
     plt.show()
     exit(0)
     # Plot naive homography with forward mapping, fast implementation

@@ -33,29 +33,25 @@ class Solution:
         """
         # return homography
         """INSERT YOUR CODE HERE"""
-                # return homography
-        N = len(match_p_src[0])
+        N = match_p_src.shape[1]
         if N < 4:
-            raise('Error - the number of matching is insufficient')
+            raise ValueError('Error - the number of matching point is insufficient. {0} < 4'.format(N))
    
-        A = np.zeros((2*N, 9))
+        # Construct A
+        A = np.zeros((2 * N, 9))
         j = 0
         for i in range(N):
-            X_i = np.append(match_p_src[:,i], 1)
-            X_itag = np.append(match_p_dst[:,i], 1)
-            j_row = np.concatenate((X_i.T, [0,0,0], -1 * X_itag[0] * X_i.T))
-            jplusone_row = np.concatenate(([0,0,0], X_i.T, -1 * X_itag[1] * X_i.T))
-            A[j,:] = j_row
-            A[j+1,:] = jplusone_row
-            j += 2
+            j = 2 * i
+            X_i = np.append(match_p_src[:, i], 1)
+            X_itag = np.append(match_p_dst[:, i], 1)
+            A[j, :] = np.concatenate((X_i.T, [0, 0, 0], -1 * X_itag[0] * X_i.T))
+            A[j + 1, :] = np.concatenate(([0, 0, 0], X_i.T, -1 * X_itag[1] * X_i.T))
 
-        A_T = A.T
-        A_T_A_product = np.dot(A_T, A)
-        #eigen values and vectors computations
-        eigenvalues, eigenvectors = np.linalg.eig(A_T_A_product)
-        min_idx = np.argmin(eigenvalues)
-        min_eigen_vect = eigenvectors[:, min_idx]
-        H = min_eigen_vect.reshape(3, 3)
+        # SVD
+        eigenvalues, eigenvectors = np.linalg.eig(np.dot(A.T, A))
+        # The homography vector is the eigenvector corresponding to the smallest eigenvalue
+        h = eigenvectors[:, np.argmin(np.abs(eigenvalues))]
+        H = h.reshape(3, 3)
 
         return H
 
@@ -85,17 +81,17 @@ class Solution:
         # return new_image
         """INSERT YOUR CODE HERE"""
         dst_image = np.zeros(dst_image_shape, dtype=src_image.dtype)
-        src_image_shape = src_image.shape
+        h1, w1 = src_image.shape[:-1]
+        h2, w2 = dst_image.shape[:-1]
 
-        for u in range(src_image_shape[0]):
-            for v in range(src_image_shape[1]):
+        for v in range(h1):
+            for u in range(w1):
                 x = np.array([u, v, 1])
                 x_tag = np.dot(homography, x)
                 x_tag = x_tag / x_tag[-1]
-                u_tag = round(x_tag[0])
-                v_tag = round(x_tag[1])
-                if (0 <= u_tag <= dst_image.shape[0] and 0 <= v_tag <= dst_image.shape[1]):
-                    dst_image[u_tag][v_tag] = src_image[u][v]
+                u_tag, v_tag = np.round(x_tag[0:2]).astype(int) # Nearest neighboor
+                if (0 <= u_tag <= w2 and 0 <= v_tag <= h2):
+                    dst_image[v_tag][u_tag] = src_image[v][u]
 
         return dst_image
 
