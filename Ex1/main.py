@@ -138,6 +138,19 @@ def main():
     print('RANSAC Homography Test {:5.4f} sec'.format(toc(tt)))
     print([fit_percent, dist_mse])
 
+    tt = time.time()
+    transformed_image_fast = solution.compute_forward_homography_fast(
+        homography=ransac_homography,
+        src_image=src_img,
+        dst_image_shape=dst_img.shape)
+    print('RANSAC Homography Fast computation for imperfect matches takes '
+          '{:5.4f} sec'.format(toc(tt)))
+    plt.figure()
+    forward_panorama_imperfect_matches_plot = plt.imshow(transformed_image_fast)
+    plt.title('Forward RANSAC Panorama imperfect matches')
+    plt.show()
+    plt.savefig('outputs/fast_ransac_homography_imperfect.jpeg')
+    exit(0)
     # Build panorama
     tt = tic()
     img_pan = solution.panorama(src_img,
