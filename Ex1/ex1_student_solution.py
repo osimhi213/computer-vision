@@ -463,14 +463,16 @@ class Solution:
         forward_homography = self.compute_homography(match_p_src, match_p_dst, inliers_percent, max_err)
         h1, w1 = src_image.shape[:2]
         src_bbox = np.array([
-            [0, 0, w1, w1],
-            [0, h1, 0, h1]
+            [0, 0, w1 - 1, w1 - 1],
+            [0, h1 - 1, 0, h1 - 1]
         ])
 
         mapped_bbox = transfrom_points(forward_homography, src_bbox)
         h2, w2 = dst_image.shape[:2]
         x_min = min(np.min(mapped_bbox[0]), 0)
-        x_max = max(np.max(mapped_bbox[0], w2))
+        x_max = max(np.max(mapped_bbox[0]), w2 - 1)
         y_min = min(np.min(mapped_bbox[1]), 0)
-        y_max = max(np.max(mapped_bbox[1], h2))
-        
+        y_max = max(np.max(mapped_bbox[1]), h2 - 1)
+        w, h = (x_max - x_min + 1, y_max - y_min + 1)
+
+        # 2

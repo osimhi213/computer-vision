@@ -19,4 +19,4 @@ def load_data(is_perfect_matches=True):
 
 src_img, dst_img, match_p_src, match_p_dst = load_data(False)
 
-Solution().compute_homography(match_p_src, match_p_dst, 0.8, 25)
+Solution().panorama(src_img, dst_img, match_p_src, match_p_dst, 0.8, 25)
