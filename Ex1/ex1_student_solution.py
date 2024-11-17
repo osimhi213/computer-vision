@@ -227,10 +227,10 @@ class Solution:
         N = match_p_src.shape[1]
         z = np.ones((1, N), dtype=match_p_src.dtype)
         x = np.concatenate((match_p_src, z), axis=0)
-        x_tag = np.dot(homography, x)
-        mapped_p_src = np.round(x_tag / x_tag[-1])[:2].astype(np.int)
+        x_tag_pred = np.dot(homography, x)
+        mapped_p_dest = np.round(x_tag_pred / x_tag_pred[-1])[:2].astype(np.int)
 
-        errors = np.linalg.norm(mapped_p_src - match_p_dst, ord=2, axis=0)
+        errors = np.linalg.norm(mapped_p_dest - match_p_dst, ord=2, axis=0)
         inliers = errors <= max_err
         
         mp_src_meets_model = match_p_src[:, inliers]
@@ -271,22 +271,22 @@ class Solution:
         # return homography
         """INSERT YOUR CODE HERE"""
         N = match_p_src.shape[1]
-        best_dist_mse = np.inf
-        homography = None
+        optimal_dist_mse = np.inf
+        optimal_homography = None
         for i in range(k):
-            choices = np.random.choice(range(N), size=n, replace=False)
-            H = self.compute_homography_naive(match_p_src[:, choices], match_p_dst[:, choices])
+            points_set = np.random.choice(range(N), size=n, replace=False)
+            H = self.compute_homography_naive(match_p_src[:, points_set], match_p_dst[:, points_set])
             fit_precent, _ = self.test_homography(H, match_p_src, match_p_dst, t)
             if fit_precent >= d:
                 mp_src_meets_model, mp_dst_meets_model = self.meet_the_model_points(H, match_p_src, match_p_dst, t)
                 H = self.compute_homography_naive(mp_src_meets_model, mp_dst_meets_model)
-                fit_precent, dist_mse = self.test_homography(H, match_p_src, match_p_dst, t)                    
+                _, dist_mse = self.test_homography(H, match_p_src, match_p_dst, t)                    
 
-                if dist_mse < best_dist_mse:
-                    homography = H
-                    best_dist_mse = dist_mse
+                if dist_mse < optimal_dist_mse:
+                    optimal_homography = H
+                    optimal_dist_mse = dist_mse
 
-        return homography
+        return optimal_homography
 
     @staticmethod
     def compute_backward_mapping(
