@@ -316,7 +316,7 @@ class Solution:
 
         # return backward_warp
         """INSERT YOUR CODE HERE"""
-        pass
+        
 
     @staticmethod
     def find_panorama_shape(src_image: np.ndarray,
@@ -451,4 +451,26 @@ class Solution:
         """
         # return np.clip(img_panorama, 0, 255).astype(np.uint8)
         """INSERT YOUR CODE HERE"""
-        pass
+        def transfrom_points(homography, src_points):
+            N = src_points.shape[1]
+            z = np.ones((1, N), dtype=src_points.dtype)
+            x = np.concatenate((src_points, z), axis=0)
+            x_tag_pred = np.dot(homography, x)
+            mapped_p_dest = np.round(x_tag_pred / x_tag_pred[-1])[:2].astype(np.int)
+
+            return mapped_p_dest
+        # 1
+        forward_homography = self.compute_homography(match_p_src, match_p_dst, inliers_percent, max_err)
+        h1, w1 = src_image.shape[:2]
+        src_bbox = np.array([
+            [0, 0, w1, w1],
+            [0, h1, 0, h1]
+        ])
+
+        mapped_bbox = transfrom_points(forward_homography, src_bbox)
+        h2, w2 = dst_image.shape[:2]
+        x_min = min(np.min(mapped_bbox[0]), 0)
+        x_max = max(np.max(mapped_bbox[0], w2))
+        y_min = min(np.min(mapped_bbox[1]), 0)
+        y_max = max(np.max(mapped_bbox[1], h2))
+        
