@@ -145,7 +145,6 @@ class Solution:
         v = v.reshape(-1)[valid_coords]
         u_tag = U_tag[valid_coords]
         v_tag = V_tag[valid_coords]
-
         # 5
         dst_image[v_tag, u_tag, :] = src_image[v, u, :]
 
@@ -182,17 +181,17 @@ class Solution:
         N = match_p_src.shape[1]
         z = np.ones((1, N), dtype=match_p_src.dtype)
         x = np.concatenate((match_p_src, z), axis=0)
-        x_tag = np.dot(homography, x)
-        mapped_p_src = np.round(x_tag / x_tag[-1])[:2].astype(np.int)
+        x_tag_pred = np.dot(homography, x)
+        mapped_p_dest = np.round(x_tag_pred / x_tag_pred[-1])[:2].astype(np.int)
 
-        errors = np.linalg.norm(mapped_p_src - match_p_dst, ord=2, axis=0)
-        inliers = errors <= max_err
+        dists = np.linalg.norm(mapped_p_dest - match_p_dst, ord=2, axis=0)
+        inliers = dists <= max_err
         num_of_inliers = np.count_nonzero(inliers)
         fit_precent = num_of_inliers / N
 
         if num_of_inliers > 0:
-            inliers_errors = np.linalg.norm((mapped_p_src - match_p_dst)[:, inliers], ord=2, axis=0)
-            dist_mse = np.mean(inliers_errors)
+            inliers_errors = np.linalg.norm((mapped_p_dest - match_p_dst)[:, inliers], ord=2, axis=0)
+            dist_mse = np.mean(inliers_errors ** 2)
         else:
             dist_mse = 1e9
 
