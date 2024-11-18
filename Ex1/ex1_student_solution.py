@@ -494,14 +494,14 @@ class Solution:
 
         # 5
         panorama = np.zeros(panorama_shape, dtype=dst_image.shape)
-        w2, h2, _ = dst_image.shape
+        h2, w2, _ = dst_image.shape
         pl = pad_struct.pad_left
         pu = pad_struct.pad_up
-        panorama[pl: w2 + pl, pu:h2 + pu, :] = dst_image
+        panorama[pu: h2 + pu, pl:w2 + pl, :] = dst_image
 
         # 6
         indices = panorama == 0
         panorama[indices] = bacward_warp[indices]
 
         # 7
-        return np.clip(panorama, 0, 255)
+        return np.clip(panorama, 0, 255).astype(dst_image.dtype)
