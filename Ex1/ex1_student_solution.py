@@ -478,15 +478,6 @@ class Solution:
         """
         # return np.clip(img_panorama, 0, 255).astype(np.uint8)
         """INSERT YOUR CODE HERE"""
-        def transfrom_points(homography, src_points):
-            N = src_points.shape[1]
-            z = np.ones((1, N), dtype=src_points.dtype)
-            x = np.concatenate((src_points, z), axis=0)
-            x_tag_pred = np.dot(homography, x)
-            mapped_p_dest = np.round(x_tag_pred / x_tag_pred[-1])[:2].astype(np.int)
-
-            return mapped_p_dest
-
         # 1
         forward_homography = self.compute_homography(match_p_src, match_p_dst, inliers_percent, max_err)
         panorama_rows_num, panorama_cols_num, pad_struct = self.find_panorama_shape(src_image, dst_image, forward_homography)
@@ -499,4 +490,18 @@ class Solution:
         backward_homography = self.add_translation_to_backward_homography(backward_homography, pad_struct.pad_left, pad_struct.pad_up)
 
         # 4
-        
+        bacward_warp = self.compute_backward_mapping(backward_homography, src_image, panorama_shape)
+
+        # 5
+        panorama = np.zeros(panorama_shape, dtype=dst_image.shape)
+        w2, h2, _ = dst_image.shape
+        pl = pad_struct.pad_left
+        pu = pad_struct.pad_up
+        panorama[pl: w2 + pl, pu:h2 + pu, :] = dst_image
+
+        # 6
+        indices = panorama == 0
+        panorama[indices] = bacward_warp[indices]
+
+        # 7
+        return np.clip(panorama, 0, 255)
