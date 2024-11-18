@@ -316,7 +316,7 @@ class Solution:
 
         # return backward_warp
         dst_image = np.zeros(dst_image_shape, dtype=src_image.dtype)
-        h1, w1, num_chanels = dst_image.shape[:-1]
+        h1, w1, num_chanels = dst_image.shape
         h2, w2 = src_image.shape[:-1]
 
         # 1
@@ -435,7 +435,11 @@ class Solution:
         """
         # return final_homography
         """INSERT YOUR CODE HERE"""
-        pass
+        T = np.array([[1, 0 , -pad_left], [0, 1, -pad_up], [0, 0, 1]])
+        H = np.dot(backward_homography, T)
+        H /= np.linalg.det(H)
+
+        return H
 
     def panorama(self,
                  src_image: np.ndarray,
@@ -493,7 +497,7 @@ class Solution:
         bacward_warp = self.compute_backward_mapping(backward_homography, src_image, panorama_shape)
 
         # 5
-        panorama = np.zeros(panorama_shape, dtype=dst_image.shape)
+        panorama = np.zeros(panorama_shape, dtype=dst_image.dtype)
         h2, w2, _ = dst_image.shape
         pl = pad_struct.pad_left
         pu = pad_struct.pad_up

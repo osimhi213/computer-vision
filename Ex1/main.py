@@ -13,7 +13,7 @@ from ex1_student_solution import Solution
 # Don't forget to fill in your IDs!!!
 # students' IDs:
 ID1 = '206869000'
-ID2 = '987654321'
+ID2 = '209951383'
 ##########################################################
 
 
@@ -150,7 +150,7 @@ def main():
     plt.title('Forward RANSAC Panorama imperfect matches')
     plt.show()
     plt.savefig('outputs/fast_ransac_homography_imperfect.jpeg')
-    exit(0)
+
     # Build panorama
     tt = tic()
     img_pan = solution.panorama(src_img,

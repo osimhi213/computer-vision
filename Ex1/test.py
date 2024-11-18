@@ -1,5 +1,6 @@
 import scipy.io
 import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
 
 from ex1_student_solution import Solution
 
@@ -19,4 +20,10 @@ def load_data(is_perfect_matches=True):
 
 src_img, dst_img, match_p_src, match_p_dst = load_data(False)
 
-Solution().panorama(src_img, dst_img, match_p_src, match_p_dst, 0.8, 25)
+panorama = Solution().panorama(src_img, dst_img, match_p_src, match_p_dst, 0.8, 25)
+plt.figure()
+course_panorama_plot = plt.imshow(panorama)
+plt.title('Great Panorama')
+# plt.show()
+plt.show()
+plt.savefig('outputs/panorama.jpg')
