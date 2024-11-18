@@ -315,8 +315,35 @@ class Solution:
         """
 
         # return backward_warp
-        """INSERT YOUR CODE HERE"""
-        
+        dst_image = np.zeros(dst_image_shape, dtype=src_image.dtype)
+        h1, w1, num_chanels = dst_image.shape[:-1]
+        h2, w2 = src_image.shape[:-1]
+
+        # 1
+        U, V = np.meshgrid(np.arange(w1), np.arange(h1))
+        u = U.reshape(1, -1)
+        v = V.reshape(1, -1)
+        z = np.ones((1, h1 * w1))
+        # 2
+        P = np.concatenate((u, v, z))
+        # 3
+        P_tag = np.dot(backward_projective_homography, P)
+        P_tag /= P_tag[-1, :]
+        U_tag, V_tag = P_tag[0:2]
+        valid_coords = np.where((U_tag >= 0) & (U_tag < w2) & (V_tag >= 0) & (V_tag < h2))[0]
+        u = u.reshape(-1)[valid_coords]
+        v = v.reshape(-1)[valid_coords]
+        u_tag = U_tag[valid_coords]
+        v_tag = V_tag[valid_coords]
+        # 4
+        src_x_points, src_y_points = np.meshgrid(np.arange(w2), np.arange(h2))
+        src_x_points = src_x_points.reshape(-1)
+        src_y_points = src_y_points.reshape(-1)
+        # 5
+        for ch in range(num_chanels):
+            dst_image[v, u, ch] = griddata((src_x_points, src_y_points), src_image[:, :, ch].reshape(-1), (u_tag, v_tag), method='cubic')
+
+        return dst_image
 
     @staticmethod
     def find_panorama_shape(src_image: np.ndarray,
@@ -459,20 +486,17 @@ class Solution:
             mapped_p_dest = np.round(x_tag_pred / x_tag_pred[-1])[:2].astype(np.int)
 
             return mapped_p_dest
+
         # 1
         forward_homography = self.compute_homography(match_p_src, match_p_dst, inliers_percent, max_err)
-        h1, w1 = src_image.shape[:2]
-        src_bbox = np.array([
-            [0, 0, w1 - 1, w1 - 1],
-            [0, h1 - 1, 0, h1 - 1]
-        ])
-
-        mapped_bbox = transfrom_points(forward_homography, src_bbox)
-        h2, w2 = dst_image.shape[:2]
-        x_min = min(np.min(mapped_bbox[0]), 0)
-        x_max = max(np.max(mapped_bbox[0]), w2 - 1)
-        y_min = min(np.min(mapped_bbox[1]), 0)
-        y_max = max(np.max(mapped_bbox[1]), h2 - 1)
-        w, h = (x_max - x_min + 1, y_max - y_min + 1)
+        panorama_rows_num, panorama_cols_num, pad_struct = self.find_panorama_shape(src_image, dst_image, forward_homography)
+        panorama_shape = (panorama_rows_num, panorama_cols_num, dst_image.shape[-1])
 
         # 2
+        backward_homography = self.compute_homography(match_p_dst, match_p_src, inliers_percent, max_err)
+
+        # 3
+        backward_homography = self.add_translation_to_backward_homography(backward_homography, pad_struct.pad_left, pad_struct.pad_up)
+
+        # 4
+        
