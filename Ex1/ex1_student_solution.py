@@ -48,7 +48,7 @@ class Solution:
             A[j + 1, :] = np.concatenate(([0, 0, 0], X_i.T, -1 * X_itag[1] * X_i.T))
 
         # SVD
-        eigenvalues, eigenvectors = np.linalg.eig(np.dot(A.T, A))
+        eigenvalues, eigenvectors = np.linalg.eig(A.T @ A)
         # The homography vector is the eigenvector corresponding to the smallest eigenvalue
         h = eigenvectors[:, np.argmin(np.abs(eigenvalues))]
         H = h.reshape(3, 3)
@@ -87,9 +87,10 @@ class Solution:
         for v in range(h1):
             for u in range(w1):
                 x = np.array([u, v, 1])
-                x_tag = np.dot(homography, x)
-                x_tag = x_tag / x_tag[-1]
-                u_tag, v_tag = np.round(x_tag[0:2]).astype(np.int) # Nearest neighboor
+                x_tag = homography @ x
+                x_tag /= x_tag[-1]
+                u_tag, v_tag = np.round(x_tag[0:2]).astype(np.int)  # Nearest neighboor
+
                 if (0 <= u_tag < w2 and 0 <= v_tag < h2):
                     dst_image[v_tag, u_tag, :] = src_image[v, u, :]
 
@@ -136,9 +137,9 @@ class Solution:
         # 2
         P = np.concatenate((u, v, z))
         # 3
-        P_tag = np.dot(homography, P)
+        P_tag = homography @ P
         # 4
-        P_tag = P_tag / P_tag[-1, :]
+        P_tag /= P_tag[-1, :]
         U_tag, V_tag = np.round(P_tag[0:2]).astype(np.int)
         valid_coords = np.where((U_tag >= 0) & (U_tag < w2) & (V_tag >= 0) & (V_tag < h2))[0]
         u = u.reshape(-1)[valid_coords]
@@ -181,7 +182,7 @@ class Solution:
         N = match_p_src.shape[1]
         z = np.ones((1, N), dtype=match_p_src.dtype)
         x = np.concatenate((match_p_src, z), axis=0)
-        x_tag_pred = np.dot(homography, x)
+        x_tag_pred = homography @ x
         mapped_p_dest = np.round(x_tag_pred / x_tag_pred[-1])[:2].astype(np.int)
 
         dists = np.linalg.norm(mapped_p_dest - match_p_dst, ord=2, axis=0)
@@ -227,7 +228,7 @@ class Solution:
         N = match_p_src.shape[1]
         z = np.ones((1, N), dtype=match_p_src.dtype)
         x = np.concatenate((match_p_src, z), axis=0)
-        x_tag_pred = np.dot(homography, x)
+        x_tag_pred = homography @ x
         mapped_p_dest = np.round(x_tag_pred / x_tag_pred[-1])[:2].astype(np.int)
 
         errors = np.linalg.norm(mapped_p_dest - match_p_dst, ord=2, axis=0)
@@ -327,7 +328,7 @@ class Solution:
         # 2
         P = np.concatenate((u, v, z))
         # 3
-        P_tag = np.dot(backward_projective_homography, P)
+        P_tag = backward_projective_homography @ P
         P_tag /= P_tag[-1, :]
         U_tag, V_tag = P_tag[0:2]
         valid_coords = np.where((U_tag >= 0) & (U_tag < w2) & (V_tag >= 0) & (V_tag < h2))[0]
@@ -436,7 +437,7 @@ class Solution:
         # return final_homography
         """INSERT YOUR CODE HERE"""
         T = np.array([[1, 0 , -pad_left], [0, 1, -pad_up], [0, 0, 1]])
-        H = np.dot(backward_homography, T)
+        H = backward_homography @ T
         H /= np.linalg.det(H)
 
         return H
@@ -494,7 +495,7 @@ class Solution:
         backward_homography = self.add_translation_to_backward_homography(backward_homography, pad_struct.pad_left, pad_struct.pad_up)
 
         # 4
-        bacward_warp = self.compute_backward_mapping(backward_homography, src_image, panorama_shape)
+        backward_warp = self.compute_backward_mapping(backward_homography, src_image, panorama_shape)
 
         # 5
         panorama = np.zeros(panorama_shape, dtype=dst_image.dtype)
@@ -504,8 +505,8 @@ class Solution:
         panorama[pu: h2 + pu, pl:w2 + pl, :] = dst_image
 
         # 6
-        indices = panorama == 0
-        panorama[indices] = bacward_warp[indices]
+        unassigend_indices = panorama == 0
+        panorama[unassigend_indices] = backward_warp[unassigend_indices]
 
         # 7
         return np.clip(panorama, 0, 255).astype(dst_image.dtype)
