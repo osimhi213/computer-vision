@@ -182,6 +182,7 @@ def main():
     course_panorama_plot = plt.imshow(img_pan)
     plt.title('Great Panorama')
     # plt.show()
+    plt.savefig('outputs/panorama.jpg')
 
 
 def your_images_loader():
@@ -261,7 +262,6 @@ def your_images_main():
     plt.figure()
     reversed_student_panorama = plt.imshow(img_pan2)
     plt.title('Reversed Awesome Panorama')
-    plt.savefig('outputs/panorama.jpg')
     # plt.show()
 
 
