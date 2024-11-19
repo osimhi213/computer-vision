@@ -77,7 +77,6 @@ def main():
         homography=naive_homography,
         src_image=src_img,
         dst_image_shape=dst_img.shape)
-    print(transformed_image_fast)
     print('Naive Homography Fast computation takes {:5.4f} sec'.format(toc(tt)))
     plt.figure()
     forward_panorama_fast_plot = plt.imshow(transformed_image_fast)
@@ -151,6 +150,23 @@ def main():
     plt.show()
     plt.savefig('outputs/fast_ransac_homography_imperfect.jpeg')
 
+    # Build backward warp
+    backward_homography = solution.compute_homography(match_p_dst, 
+                                                      match_p_src,
+                                                      inliers_percent,
+                                                      max_err)
+    tt = time.time()
+    backward_warp_image = solution.compute_backward_mapping(
+                                      backward_projective_homography=backward_homography,
+                                      src_image=src_img,
+                                      dst_image_shape=dst_img.shape)
+    print('Backward Warp takes {:5.4f} sec'.format(toc(tt)))
+    plt.figure()
+    course_backward_warp_img = plt.imshow(backward_warp_image.astype(np.uint8))
+    plt.title('Backward warp example')
+    plt.savefig('outputs/backward_warp_imperfect.jpeg')
+    # plt.show()
+
     # Build panorama
     tt = tic()
     img_pan = solution.panorama(src_img,
@@ -166,7 +182,6 @@ def main():
     course_panorama_plot = plt.imshow(img_pan)
     plt.title('Great Panorama')
     # plt.show()
-    plt.show()
 
 
 def your_images_loader():
@@ -210,7 +225,6 @@ def your_images_main():
         src_image=src_img_test,
         dst_image_shape=dst_img_test.shape)
     plt.figure()
-    import numpy as np
     student_forward_warp_img = plt.imshow(img.astype(np.uint8))
     plt.title('Forward warp example')
     # plt.show()
@@ -223,7 +237,6 @@ def your_images_main():
                                       src_image=src_img_test,
                                       dst_image_shape=dst_img_test.shape)
     plt.figure()
-    import numpy as np
     student_backward_warp_img = plt.imshow(img.astype(np.uint8))
     plt.title('Backward warp example')
     # plt.show()
@@ -248,9 +261,11 @@ def your_images_main():
     plt.figure()
     reversed_student_panorama = plt.imshow(img_pan2)
     plt.title('Reversed Awesome Panorama')
-    plt.show()
+    plt.savefig('outputs/panorama.jpg')
+    # plt.show()
 
 
 if __name__ == '__main__':
     main()
+    exit(0)
     your_images_main()
