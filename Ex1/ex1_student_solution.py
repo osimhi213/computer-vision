@@ -40,17 +40,16 @@ class Solution:
         # Construct A
         A = np.zeros((2 * N, 9))
         match_p_src_homogenous = np.vstack([match_p_src, np.ones((1, N))]) 
-        A[::2, 0:3] = -1 * match_p_src_homogenous.T
-        A[1::2, 3:6] = -1 * match_p_src_homogenous.T
-        # # A[::2, 6] = match_p_src[0, :] * match_p_dst[0, :]
-        # # A[1::2, 6] = match_p_src[0, :] * match_p_dst[1, :]
-        # # A[::2, 7] = match_p_src[1, :] * match_p_dst[0, :]
-        # # A[1::2, 7] = match_p_src[1, :] * match_p_dst[1, :]
-        # # A[::2, 8] = match_p_dst[0, :]
-        # # A[1::2, 8] = match_p_dst[1, :]
-        A[:, 6:] = (match_p_src_homogenous.T[:, None, :] * match_p_dst.T[:, :, None]).reshape(-1, 3)
+        A[::2, 0:3] = A[1::2, 3:6] = -1 * match_p_src_homogenous.T
+        A[::2, 6] = match_p_src[0, :] * match_p_dst[0, :]
+        A[1::2, 6] = match_p_src[0, :] * match_p_dst[1, :]
+        A[::2, 7] = match_p_src[1, :] * match_p_dst[0, :]
+        A[1::2, 7] = match_p_src[1, :] * match_p_dst[1, :]
+        A[::2, 8] = match_p_dst[0, :]
+        A[1::2, 8] = match_p_dst[1, :]
+
         # SVD decomposition
-        U, S, Vt = svd(np.dot(A.T, A))
+        U, S, Vt = svd(A.T @ A)
 
         # The homography vector corresponds to the smallest singular value
         h = Vt[-1, :]  # Last row of V^T corresponds to the smallest singular value
