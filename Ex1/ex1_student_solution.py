@@ -83,17 +83,18 @@ class Solution:
         # return new_image
         """INSERT YOUR CODE HERE"""
         dst_image = np.zeros(dst_image_shape, dtype=src_image.dtype)
-        h1, w1 = src_image.shape[:-1]
-        h2, w2 = dst_image.shape[:-1]
+        h_s, w_s = src_image.shape[:-1]
+        h_d, w_d = dst_image.shape[:-1]
 
-        for v in range(h1):
-            for u in range(w1):
-                x = np.array([u, v, 1])
-                x_tag = np.dot(homography, x)
-                x_tag = x_tag / x_tag[-1]
-                u_tag, v_tag = np.round(x_tag[0:2]).astype(np.int) # Nearest neighboor
-                if (0 <= u_tag < w2 and 0 <= v_tag < h2):
-                    dst_image[v_tag, u_tag, :] = src_image[v, u, :]
+        for v_s in range(h_s):
+            for u_s in range(w_s):
+                x_s = np.array([u_s, v_s, 1])
+                x_d = homography @ x_s
+                x_d /= x_d[-1]
+                u_d, v_d = np.round(x_d[0:2]).astype(np.int)  # Nearest neighboor
+
+                if (0 <= u_d < w_d and 0 <= v_d < h_d):
+                    dst_image[v_d, u_d, :] = src_image[v_s, u_s, :]
 
         return dst_image
 
@@ -127,28 +128,28 @@ class Solution:
         # return new_image
         """INSERT YOUR CODE HERE"""
         dst_image = np.zeros(dst_image_shape, dtype=src_image.dtype)
-        h1, w1 = src_image.shape[:-1]
-        h2, w2 = dst_image.shape[:-1]
+        h_s, w_s = src_image.shape[:-1]
+        h_d, w_d = dst_image.shape[:-1]
 
         # 1
-        U, V = np.meshgrid(np.arange(w1), np.arange(h1))
-        u = U.reshape(1, -1)
-        v = V.reshape(1, -1)
-        z = np.ones((1, h1 * w1))
+        U, V = np.meshgrid(np.arange(w_s), np.arange(h_s))
+        u_s = U.reshape(1, -1)
+        v_s = V.reshape(1, -1)
+        z_s = np.ones((1, h_s * w_s))
         # 2
-        P = np.concatenate((u, v, z))
+        pts_s = np.concatenate((u_s, v_s, z_s))
         # 3
-        P_tag = np.dot(homography, P)
+        pts_d = homography @ pts_s
         # 4
-        P_tag = P_tag / P_tag[-1, :]
-        U_tag, V_tag = np.round(P_tag[0:2]).astype(np.int)
-        valid_coords = np.where((U_tag >= 0) & (U_tag < w2) & (V_tag >= 0) & (V_tag < h2))[0]
-        u = u.reshape(-1)[valid_coords]
-        v = v.reshape(-1)[valid_coords]
-        u_tag = U_tag[valid_coords]
-        v_tag = V_tag[valid_coords]
+        pts_d /= pts_d[-1, :]
+        u_d, v_d = np.round(pts_d[0:2]).astype(np.int)
+        valid_coords = np.where((u_d >= 0) & (u_d < w_d) & (v_d >= 0) & (v_d < h_d))[0]
+        u_s = u_s.reshape(-1)[valid_coords]
+        v_s = v_s.reshape(-1)[valid_coords]
+        u_d = u_d[valid_coords]
+        v_d = v_d[valid_coords]
         # 5
-        dst_image[v_tag, u_tag, :] = src_image[v, u, :]
+        dst_image[v_d, u_d, :] = src_image[v_s, u_s, :]
 
         return dst_image
 
@@ -182,17 +183,17 @@ class Solution:
         """INSERT YOUR CODE HERE"""
         N = match_p_src.shape[1]
         z = np.ones((1, N), dtype=match_p_src.dtype)
-        x = np.concatenate((match_p_src, z), axis=0)
-        x_tag_pred = np.dot(homography, x)
-        mapped_p_dest = np.round(x_tag_pred / x_tag_pred[-1])[:2].astype(np.int)
+        pts_s = np.concatenate((match_p_src, z), axis=0)
+        mapped_p_dst = homography @ pts_s
+        mapped_p_dst = np.round(mapped_p_dst / mapped_p_dst[-1])[:2].astype(np.int)
 
-        dists = np.linalg.norm(mapped_p_dest - match_p_dst, ord=2, axis=0)
+        dists = np.linalg.norm(mapped_p_dst - match_p_dst, ord=2, axis=0)
         inliers = dists <= max_err
-        num_of_inliers = np.count_nonzero(inliers)
-        fit_precent = num_of_inliers / N
+        inliers_num = np.count_nonzero(inliers)
+        fit_precent = inliers_num / N
 
-        if num_of_inliers > 0:
-            inliers_errors = np.linalg.norm((mapped_p_dest - match_p_dst)[:, inliers], ord=2, axis=0)
+        if inliers_num > 0:
+            inliers_errors = np.linalg.norm((mapped_p_dst - match_p_dst)[:, inliers], ord=2, axis=0)
             dist_mse = np.mean(inliers_errors ** 2)
         else:
             dist_mse = 1e9
@@ -228,12 +229,12 @@ class Solution:
         """INSERT YOUR CODE HERE"""
         N = match_p_src.shape[1]
         z = np.ones((1, N), dtype=match_p_src.dtype)
-        x = np.concatenate((match_p_src, z), axis=0)
-        x_tag_pred = np.dot(homography, x)
-        mapped_p_dest = np.round(x_tag_pred / x_tag_pred[-1])[:2].astype(np.int)
+        pts_s = np.concatenate((match_p_src, z), axis=0)
+        mapped_p_dst = homography @ pts_s
+        mapped_p_dst = np.round(mapped_p_dst / mapped_p_dst[-1])[:2].astype(np.int)
 
-        errors = np.linalg.norm(mapped_p_dest - match_p_dst, ord=2, axis=0)
-        inliers = errors <= max_err
+        dists = np.linalg.norm(mapped_p_dst - match_p_dst, ord=2, axis=0)
+        inliers = dists <= max_err
         
         mp_src_meets_model = match_p_src[:, inliers]
         mp_dst_meets_model = match_p_dst[:, inliers]
@@ -276,8 +277,8 @@ class Solution:
         optimal_dist_mse = np.inf
         optimal_homography = None
         for i in range(k):
-            points_set = np.random.choice(range(N), size=n, replace=False)
-            H = self.compute_homography_naive(match_p_src[:, points_set], match_p_dst[:, points_set])
+            drawn_pts = np.random.choice(range(N), size=n, replace=False)
+            H = self.compute_homography_naive(match_p_src[:, drawn_pts], match_p_dst[:, drawn_pts])
             fit_precent, _ = self.test_homography(H, match_p_src, match_p_dst, t)
             if fit_precent >= d:
                 mp_src_meets_model, mp_dst_meets_model = self.meet_the_model_points(H, match_p_src, match_p_dst, t)
@@ -318,32 +319,32 @@ class Solution:
 
         # return backward_warp
         dst_image = np.zeros(dst_image_shape, dtype=src_image.dtype)
-        h1, w1, num_chanels = dst_image.shape
-        h2, w2 = src_image.shape[:-1]
+        h_d, w_d, num_channels = dst_image.shape
+        h_s, w_s = src_image.shape[:-1]
 
         # 1
-        U, V = np.meshgrid(np.arange(w1), np.arange(h1))
-        u = U.reshape(1, -1)
-        v = V.reshape(1, -1)
-        z = np.ones((1, h1 * w1))
+        U, V = np.meshgrid(np.arange(w_d), np.arange(h_d))
+        u_d = U.reshape(1, -1)
+        v_d = V.reshape(1, -1)
+        z_d = np.ones((1, h_d * w_d))
         # 2
-        P = np.concatenate((u, v, z))
+        pts_d = np.concatenate((u_d, v_d, z_d))
         # 3
-        P_tag = np.dot(backward_projective_homography, P)
-        P_tag /= P_tag[-1, :]
-        U_tag, V_tag = P_tag[0:2]
-        valid_coords = np.where((U_tag >= 0) & (U_tag < w2) & (V_tag >= 0) & (V_tag < h2))[0]
-        u = u.reshape(-1)[valid_coords]
-        v = v.reshape(-1)[valid_coords]
-        u_tag = U_tag[valid_coords]
-        v_tag = V_tag[valid_coords]
+        pts_s = backward_projective_homography @ pts_d
+        pts_s /= pts_s[-1, :]
+        u_s, v_s = pts_s[0:2]
+        valid_coords = np.where((u_s >= 0) & (u_s < w_s) & (v_s >= 0) & (v_s < h_s))[0]
+        u_d = u_d.reshape(-1)[valid_coords]
+        v_d = v_d.reshape(-1)[valid_coords]
+        u_s = u_s[valid_coords]
+        v_s = v_s[valid_coords]
         # 4
-        src_x_points, src_y_points = np.meshgrid(np.arange(w2), np.arange(h2))
-        src_x_points = src_x_points.reshape(-1)
-        src_y_points = src_y_points.reshape(-1)
+        x_s, y_s = np.meshgrid(np.arange(w_s), np.arange(h_s))
+        x_s = x_s.reshape(-1)
+        y_s = y_s.reshape(-1)
         # 5
-        for ch in range(num_chanels):
-            dst_image[v, u, ch] = griddata((src_x_points, src_y_points), src_image[:, :, ch].reshape(-1), (u_tag, v_tag), method='cubic')
+        for ch in range(num_channels):
+            dst_image[v_d, u_d, ch] = griddata((x_s, y_s), src_image[:, :, ch].reshape(-1), (u_s, v_s), method='cubic')
 
         return dst_image
 
@@ -438,7 +439,7 @@ class Solution:
         # return final_homography
         """INSERT YOUR CODE HERE"""
         T = np.array([[1, 0 , -pad_left], [0, 1, -pad_up], [0, 0, 1]])
-        H = np.dot(backward_homography, T)
+        H = backward_homography @ T
         H /= np.linalg.det(H)
 
         return H
@@ -496,18 +497,18 @@ class Solution:
         backward_homography = self.add_translation_to_backward_homography(backward_homography, pad_struct.pad_left, pad_struct.pad_up)
 
         # 4
-        bacward_warp = self.compute_backward_mapping(backward_homography, src_image, panorama_shape)
+        backward_warp = self.compute_backward_mapping(backward_homography, src_image, panorama_shape)
 
         # 5
         panorama = np.zeros(panorama_shape, dtype=dst_image.dtype)
-        h2, w2, _ = dst_image.shape
-        pl = pad_struct.pad_left
-        pu = pad_struct.pad_up
-        panorama[pu: h2 + pu, pl:w2 + pl, :] = dst_image
+        h_d, w_d, _ = dst_image.shape
+        p_l = pad_struct.pad_left
+        p_u = pad_struct.pad_up
+        panorama[p_u: h_d + p_u, p_l:w_d + p_l, :] = dst_image
 
         # 6
-        indices = panorama == 0
-        panorama[indices] = bacward_warp[indices]
+        unassigend_idxs = panorama == 0
+        panorama[unassigend_idxs] = backward_warp[unassigend_idxs]
 
         # 7
         return np.clip(panorama, 0, 255).astype(dst_image.dtype)
