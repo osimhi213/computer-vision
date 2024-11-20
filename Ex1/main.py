@@ -218,9 +218,35 @@ def your_images_main():
     inliers_percent = 0.8  # <<<<< YOU MAY CHANGE THIS
 
     src_img_test, dst_img_test, match_p_src, match_p_dst = your_images_loader()
-    homography = solution.compute_homography(match_p_src, match_p_dst,
+
+    # scatter the matching points
+    plt.figure()
+    plt.imshow(src_img_test)
+    plt.scatter(*match_p_src, edgecolors='blue', facecolors='none', s=20)
+    plt.title('src matching points')
+    plt.show()
+    plt.savefig('outputs/test_src_scattered.jpg')
+
+    plt.figure()
+    plt.imshow(dst_img_test)
+    plt.scatter(*match_p_dst, edgecolors='red', facecolors='none', s=20)
+    plt.title('dst matching points')
+    plt.show()
+    plt.savefig('outputs/test_dst_scattered.jpg')
+
+    homography = solution.compute_homography(match_p_src,
+                                             match_p_dst,
                                              inliers_percent,
-                                             max_err=25)
+                                             max_err)
+    # Test student homography
+    tt = time.time()
+    fit_percent, dist_mse = solution.test_homography(homography,
+                                                     match_p_src,
+                                                     match_p_dst,
+                                                     max_err)
+    print('Student Homography Test {:5.4f} sec'.format(toc(tt)))
+    print([fit_percent, dist_mse])
+
     img = solution.compute_forward_homography_fast(
         homography=homography,
         src_image=src_img_test,
@@ -229,6 +255,7 @@ def your_images_main():
     student_forward_warp_img = plt.imshow(img.astype(np.uint8))
     plt.title('Forward warp example')
     # plt.show()
+    plt.savefig('outputs/test_forward_homography.jpg')
 
     backward_homography = solution.compute_homography(match_p_dst, match_p_src,
                                                       inliers_percent,
@@ -241,6 +268,7 @@ def your_images_main():
     student_backward_warp_img = plt.imshow(img.astype(np.uint8))
     plt.title('Backward warp example')
     # plt.show()
+    plt.savefig('outputs/test_backward_homography.jpg')
 
     # Build student panorama
     tt = tic()
@@ -252,6 +280,7 @@ def your_images_main():
     student_panorama = plt.imshow(img_pan)
     plt.title('Awesome Panorama')
     # plt.show()
+    plt.savefig('outputs/test_panorama.jpg')
 
     # Build reversed student panorama
     tt = tic()
@@ -263,9 +292,9 @@ def your_images_main():
     reversed_student_panorama = plt.imshow(img_pan2)
     plt.title('Reversed Awesome Panorama')
     # plt.show()
+    plt.savefig('outputs/test_panorama_2.jpg')
 
 
 if __name__ == '__main__':
     main()
-    exit(0)
     your_images_main()
