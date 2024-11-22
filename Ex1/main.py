@@ -189,7 +189,7 @@ def your_images_loader():
     src_img_test = mpimg.imread('src_test.jpg')
     dst_img_test = mpimg.imread('dst_test.jpg')
 
-    DECIMATION_FACTOR = 5.0
+    DECIMATION_FACTOR = 2.0
     src_img_test = resize(src_img_test,
                           dsize=(int(src_img_test.shape[1]/DECIMATION_FACTOR),
                                  int(src_img_test.shape[0]/DECIMATION_FACTOR)),
@@ -218,6 +218,18 @@ def your_images_main():
     inliers_percent = 0.8  # <<<<< YOU MAY CHANGE THIS
 
     src_img_test, dst_img_test, match_p_src, match_p_dst = your_images_loader()
+
+    plt.figure()
+    plt.imshow(src_img_test)
+    plt.title('src image')
+    plt.show()
+    plt.savefig('outputs/test_src.jpg')
+
+    plt.figure()
+    plt.imshow(dst_img_test)
+    plt.title('dst image')
+    plt.show()
+    plt.savefig('outputs/test_dst.jpg')
 
     # scatter the matching points
     plt.figure()
@@ -296,5 +308,5 @@ def your_images_main():
 
 
 if __name__ == '__main__':
-    main()
+    # main()
     your_images_main()
