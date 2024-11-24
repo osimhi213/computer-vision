@@ -91,7 +91,7 @@ class Solution:
                 x_s = np.array([u_s, v_s, 1])
                 x_d = homography @ x_s
                 x_d /= x_d[-1]
-                u_d, v_d = np.round(x_d[0:2]).astype(np.int)  # Nearest neighboor
+                u_d, v_d = np.round(x_d[0:2]).astype(np.int32)  # Nearest neighboor
 
                 if (0 <= u_d < w_d and 0 <= v_d < h_d):
                     dst_image[v_d, u_d, :] = src_image[v_s, u_s, :]
@@ -142,7 +142,7 @@ class Solution:
         pts_d = homography @ pts_s
         # 4
         pts_d /= pts_d[-1, :]
-        u_d, v_d = np.round(pts_d[0:2]).astype(np.int)
+        u_d, v_d = np.round(pts_d[0:2]).astype(np.int32)
         valid_coords = np.where((u_d >= 0) & (u_d < w_d) & (v_d >= 0) & (v_d < h_d))[0]
         u_s = u_s.reshape(-1)[valid_coords]
         v_s = v_s.reshape(-1)[valid_coords]
@@ -185,7 +185,7 @@ class Solution:
         z = np.ones((1, N), dtype=match_p_src.dtype)
         pts_s = np.concatenate((match_p_src, z), axis=0)
         mapped_p_dst = homography @ pts_s
-        mapped_p_dst = np.round(mapped_p_dst / mapped_p_dst[-1])[:2].astype(np.int)
+        mapped_p_dst = np.round(mapped_p_dst / mapped_p_dst[-1])[:2].astype(np.int32)
 
         dists = np.linalg.norm(mapped_p_dst - match_p_dst, ord=2, axis=0)
         inliers = dists <= max_err
@@ -231,7 +231,7 @@ class Solution:
         z = np.ones((1, N), dtype=match_p_src.dtype)
         pts_s = np.concatenate((match_p_src, z), axis=0)
         mapped_p_dst = homography @ pts_s
-        mapped_p_dst = np.round(mapped_p_dst / mapped_p_dst[-1])[:2].astype(np.int)
+        mapped_p_dst = np.round(mapped_p_dst / mapped_p_dst[-1])[:2].astype(np.int32)
 
         dists = np.linalg.norm(mapped_p_dst - match_p_dst, ord=2, axis=0)
         inliers = dists <= max_err
