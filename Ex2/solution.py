@@ -93,13 +93,18 @@ class Solution:
         num_labels, num_of_cols = c_slice.shape[0], c_slice.shape[1]
         l_slice = np.zeros((num_labels, num_of_cols))
         """INSERT YOUR CODE HERE"""
-        # initialize first col        
+        # first column initialization     
         l_slice[:, 0] = c_slice[:, 0]
-    
-        for col in range(1, num_of_cols):
 
-            m = min(l_slice[d, col - 1], p1 + min(l_slice[d-1, col-1], l_slice[d+1, col+1]), p2 + min(l_slice[:d-2:], l_slice))
-            l_slice[:, col] = c_slice[col, :] - min(l_slice[:, col - 1])
+        for col in range(1, num_of_cols):
+            # Assume p1 and p2 are positive, with p1 <= p2, such that taking the minimum of all second neighbors plus p2
+            # is equivalent to taking the minimum of all disparity values.
+            prev = l_slice[:, col-1]
+            neighboor_r = p1 + np.append(l_slice[1:, col-1], np.inf)
+            neighboor_l = p1 + np.append(np.inf, l_slice[:-1, col-1])
+            min_second_neighboors = p2 + np.repeat(np.min(l_slice[:, col - 1]), num_labels)
+            m = np.min(np.array([prev, neighboor_l, neighboor_r, min_second_neighboors]), axis=0)
+            l_slice[:, col] = c_slice[:, col] + m[:] - min(l_slice[:, col - 1])
 
         return l_slice
 
