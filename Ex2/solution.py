@@ -42,9 +42,9 @@ class Solution:
         for i, disp in enumerate(disparity_values):
             x_d = dsp_range + disp
             images_diff = left_image - right_image_padded[:, x_d:x_d+num_of_cols]
-            images_diff_squared = images_diff ** 2
+            images_square_diff = np.sum(images_diff ** 2, axis=2)
             sum_operator = np.ones((win_size, win_size))
-            ssd = convolve2d(images_diff_squared, sum_operator, mode='same')
+            ssd = convolve2d(images_square_diff, sum_operator, mode='same')
             ssdd_tensor[:, :, i] = ssd
  
         ssdd_tensor -= ssdd_tensor.min()
@@ -93,6 +93,14 @@ class Solution:
         num_labels, num_of_cols = c_slice.shape[0], c_slice.shape[1]
         l_slice = np.zeros((num_labels, num_of_cols))
         """INSERT YOUR CODE HERE"""
+        # initialize first col        
+        l_slice[:, 0] = c_slice[:, 0]
+    
+        for col in range(1, num_of_cols):
+
+            m = min(l_slice[d, col - 1], p1 + min(l_slice[d-1, col-1], l_slice[d+1, col+1]), p2 + min(l_slice[:d-2:], l_slice))
+            l_slice[:, col] = c_slice[col, :] - min(l_slice[:, col - 1])
+
         return l_slice
 
     def dp_labeling(self,
