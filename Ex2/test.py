@@ -19,9 +19,10 @@ solution = Solution()
 
 left_image, right_image = load_data()
 
-ssdd = solution.ssd_distance(left_image.astype(np.float64),
+ssdd_tensor = solution.ssd_distance(left_image.astype(np.float64),
                                 right_image.astype(np.float64),
                                 win_size=3,
                                 dsp_range=20)
-solution.dp_grade_slice(ssdd[0].T, 0.5, 3)
 
+dp_labeling = solution.dp_labeling(ssdd_tensor, 0.5, 3)
+print(dp_labeling)

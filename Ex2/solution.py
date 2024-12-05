@@ -131,6 +131,9 @@ class Solution:
         """
         l = np.zeros_like(ssdd_tensor)
         """INSERT YOUR CODE HERE"""
+        for row in range(ssdd_tensor.shape[0]):
+            l[row] = self.dp_grade_slice(ssdd_tensor[row].T, p1, p2).T
+
         return self.naive_labeling(l)
 
     def dp_labeling_per_direction(self,
