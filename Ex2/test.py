@@ -12,5 +12,9 @@ for i in range(len(right_image)):
 
 win_size = 3
 d = win_size // 2
-ssd_tensor = solution.ssd_distance(left_image, right_image, win_size, 2)
-print(ssd_tensor[1, 2, 1])
+ssdd_tensor = solution.ssd_distance(left_image, right_image, win_size, 2)
+print(ssdd_tensor[0, 0, :])
+
+label_no_smooth = solution.naive_labeling(ssdd_tensor)
+print(label_no_smooth)
+
