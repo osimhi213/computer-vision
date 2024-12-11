@@ -31,20 +31,20 @@ solution = Solution()
 # t = np.arange(0, 20).reshape((4, 5))
 # print(np.diagonal(t))
 
-ssdd = np.arange(1, 21).reshape((5, 4))
-ssdd_tensor = np.zeros((5, 4, 3), dtype=ssdd.dtype)
+def get_scan(slices, label):
+    l = []
+    for row in slices:
+        l.append(row[label])
+    
+    return l
+
+ssdd = np.arange(1, 21).reshape((4, 5))
+ssdd_tensor = np.zeros((4, 5, 3), dtype=ssdd.dtype)
 ssdd_tensor[:, :, 0] = ssdd
 ssdd_tensor[:, :, 1] = ssdd + 20
 ssdd_tensor[:, :, 2] = ssdd + 40
 
-direction = 1
+direction = 8
 slices = solution.scan_slices(ssdd_tensor, direction)
-print(direction)
-print(ssdd_tensor[:, :, 0])
-print(slices[:, :, 0])
-print('-------------------------------')
 print(ssdd_tensor[:, :, 1])
-print(slices[:, :, 1])
-print('-------------------------------')
-print(ssdd_tensor[:, :, 2])
-print(slices[:, :, 2])
+print(get_scan(slices, 1))

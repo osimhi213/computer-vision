@@ -136,35 +136,39 @@ class Solution:
 
         return self.naive_labeling(l)
 
-    def scan_diagonals(self, tensor) -> np.ndarray:
-        rows_num, cols_num, d_range = tensor.shape
-        diagonals_tensor = np.zeros((rows_num + cols_num - 1, min(rows_num, cols_num), d_range), dtype=tensor.dtype)
-        for d in range(d_range):
-            diagonals = [tensor[:,:,d].diagonal(offset) for offset in range(-rows_num + 1, cols_num)]
-            for row in range(len(diagonals)):
-                diagonals_tensor[row, :len(diagonals[row]), d] = diagonals[row]
-            
-        return diagonals_tensor
+    def scan_diagonals(self, tensor, direction) -> np.ndarray:
+        rows_num, cols_num = tensor.shape[:2]
+        offset_min = -rows_num + 1
+        offset_max = cols_num - 1
+        slices = []
+
+        for offset in range(offset_min, offset_max + 1):
+            step = -1 if direction > 4 else 1
+             # leveraging symmetry
+            diagonal = tensor.diagonal(offset)[:, ::step]
+            slices.append(diagonal)
+
+        return slices 
 
     def scan_slices(self, ssdd_tensor: np.ndarray, direction: int) -> np.ndarray:
         """Return the tensor slices scanned along the given direction.
         """
         assert 1 <= direction <= 8, 'scan direction should be an integer between 1 and 8'
+        scan_line = direction % 4
+        tensor_to_scan = ssdd_tensor
 
-        c_slices = np.zeros_like(ssdd_tensor)
-        scan_line = direction - 4 if direction > 4 else direction
-        print(scan_line)
-        if scan_line == 1:  # horizontal
-            c_slices = ssdd_tensor
-        elif scan_line == 3:  # vertical
-            c_slices = ssdd_tensor.transpose(1, 0, 2)
-        elif scan_line == 2:  # diagonal
-            c_slices = self.scan_diagonals(ssdd_tensor)
-        elif scan_line == 4:  # diagonal
-            c_slices = self.scan_diagonals(ssdd_tensor.transpose(1, 0, 2)[::-1, :, :])
+        if scan_line == 1 or scan_line == 3:  # lines
+            if scan_line == 3:  # direction 3/7
+                tensor_to_scan = ssdd_tensor.transpose(1, 0, 2)
 
-        if direction > 4:
-            c_slices = c_slices[:, ::-1, :]
+            c_slices = tensor_to_scan.transpose(0, 2, 1)
+            if direction > 4:  # leveraging symmetry 
+                c_slices = list(c_slices[:, :, ::-1])
+        else:  # diagonal
+            if scan_line == 0:  # direction 4/8
+                tensor_to_scan = ssdd_tensor.transpose(1, 0, 2)[::-1, :, :]
+      
+            c_slices = self.scan_diagonals(tensor_to_scan, direction)
 
         return c_slices
 
