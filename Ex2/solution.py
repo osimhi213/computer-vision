@@ -99,12 +99,13 @@ class Solution:
         for col in range(1, num_of_cols):
             # Assume p1 and p2 are positive, with p1 <= p2, such that taking the minimum of all second neighbors plus p2
             # is equivalent to taking the minimum of all disparity values.
-            prev = l_slice[:, col-1]
-            neighboor_r = p1 + np.append(l_slice[1:, col-1], np.inf)
-            neighboor_l = p1 + np.append(np.inf, l_slice[:-1, col-1])
-            min_second_neighboors = p2 + np.repeat(np.min(l_slice[:, col-1]), num_labels)
-            m = np.min(np.array([prev, neighboor_l, neighboor_r, min_second_neighboors]), axis=0)
-            l_slice[:, col] = c_slice[:, col] + m[:] - min(l_slice[:, col-1])
+            prev_col = l_slice[:, col-1]
+            left_neighbor = p1 + np.append(np.inf, prev_col[:-1])
+            right_neighbor = p1 + np.append(prev_col[1:], np.inf)
+            second_neighbors = p2 + np.repeat(np.min(prev_col), num_labels)
+            min_costs = np.min(np.array([prev_col, left_neighbor, right_neighbor, second_neighbors]), axis=0)
+            
+            l_slice[:, col] = c_slice[:, col] + min_costs[:] - np.min(prev_col)
 
         return l_slice
 
@@ -144,29 +145,29 @@ class Solution:
 
         for offset in range(offset_min, offset_max + 1):
             step = -1 if direction > 4 else 1
-             # leveraging symmetry
+            # leveraging symmetry
             diagonal = tensor.diagonal(offset)[:, ::step]
             slices.append(diagonal)
 
         return slices 
 
-    def scan_slices(self, ssdd_tensor: np.ndarray, direction: int) -> np.ndarray:
+    def scan_slices(self, tensor: np.ndarray, direction: int) -> np.ndarray:
         """Return the tensor slices scanned along the given direction.
         """
         assert 1 <= direction <= 8, 'scan direction should be an integer between 1 and 8'
         scan_line = direction % 4
-        tensor_to_scan = ssdd_tensor
+        tensor_to_scan = tensor
 
         if scan_line == 1 or scan_line == 3:  # lines
             if scan_line == 3:  # direction 3/7
-                tensor_to_scan = ssdd_tensor.transpose(1, 0, 2)
+                tensor_to_scan = tensor.transpose(1, 0, 2)
 
             c_slices = tensor_to_scan.transpose(0, 2, 1)
             if direction > 4:  # leveraging symmetry 
                 c_slices = list(c_slices[:, :, ::-1])
         else:  # diagonal
             if scan_line == 0:  # direction 4/8
-                tensor_to_scan = ssdd_tensor.transpose(1, 0, 2)[::-1, :, :]
+                tensor_to_scan = tensor.transpose(1, 0, 2)[::-1, :, :]
       
             c_slices = self.scan_diagonals(tensor_to_scan, direction)
 
@@ -204,18 +205,6 @@ class Solution:
         l = np.zeros_like(ssdd_tensor)
         direction_to_slice = {}
         """INSERT YOUR CODE HERE"""
-        for direction in range(1, num_of_directions + 1):
-            ssdd = self.blah(ssdd_tensor, direction)
-            direction_to_slice[direction] = self.dp_labeling(ssdd, p1, p2)
-
-        return direction_to_slice
-        ssdd_tensor_t = ssdd_tensor.transpose(1, 0, 2)
-        direction_to_slice[1] = self.dp_labeling(ssdd_tensor, p1, p2)
-        direction_to_slice[5] = self.dp_labeling(ssdd_tensor[:, ::-1, :], p1, p2)
-        direction_to_slice[3] = self.dp_labeling(ssdd_tensor_t, p1, p2)
-        direction_to_slice[7] = self.dp_labeling(ssdd_tensor_t[:, ::-1, :], p1, p2)
-
-
         return direction_to_slice
 
     def sgm_labeling(self, ssdd_tensor: np.ndarray, p1: float, p2: float):
@@ -243,4 +232,24 @@ class Solution:
         num_of_directions = 8
         l = np.zeros_like(ssdd_tensor)
         """INSERT YOUR CODE HERE"""
+        l_direction_tensors = np.zeros((num_of_directions, *ssdd_tensor.shape))
+        rows_num, cols_num = ssdd_tensor.shape[:2]
+        flat_indices = np.arange(0, rows_num * cols_num).reshape((rows_num, cols_num, 1))
+
+        for i in range(num_of_directions):
+            direction = i + 1
+            direction_slices = self.scan_slices(ssdd_tensor, direction)
+            direction_flat_indices = self.scan_slices(flat_indices, direction)
+
+            for slice_idx, c_slice in enumerate(direction_slices):
+                slice_indices = np.unravel_index(
+                    np.squeeze(direction_flat_indices[slice_idx], axis=0),
+                    (rows_num, cols_num)
+                )
+
+                l_slice = self.dp_grade_slice(c_slice, p1, p2).T 
+                l_direction_tensors[i][slice_indices] = l_slice
+
+        l = np.mean(l_direction_tensors, axis=0)
+
         return self.naive_labeling(l)

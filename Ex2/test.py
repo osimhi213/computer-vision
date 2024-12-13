@@ -39,12 +39,30 @@ def get_scan(slices, label):
     return l
 
 ssdd = np.arange(1, 21).reshape((4, 5))
-ssdd_tensor = np.zeros((4, 5, 3), dtype=ssdd.dtype)
-ssdd_tensor[:, :, 0] = ssdd
-ssdd_tensor[:, :, 1] = ssdd + 20
-ssdd_tensor[:, :, 2] = ssdd + 40
+# ssdd_tensor = np.zeros((4, 5, 3), dtype=ssdd.dtype)
+# ssdd_tensor[:, :, 0] = ssdd
+# ssdd_tensor[:, :, 1] = ssdd + 20
+# ssdd_tensor[:, :, 2] = ssdd + 40
 
-direction = 8
-slices = solution.scan_slices(ssdd_tensor, direction)
-print(ssdd_tensor[:, :, 1])
-print(get_scan(slices, 1))
+# direction = 8
+# slices = solution.scan_slices(ssdd_tensor, direction)
+# print(ssdd_tensor[:, :, 1])
+# print(get_scan(slices, 1))
+
+rows_num = 4
+cols_num = 5
+flat_indices = np.arange(0, rows_num * cols_num).reshape((rows_num, cols_num))
+l = np.zeros_like(flat_indices)
+print(flat_indices)
+flat_indices_expanded = np.expand_dims(flat_indices, axis=-1)
+flat_indices = solution.scan_slices(flat_indices_expanded, 8)
+for slice_idx in range(len(flat_indices)):
+    scan_line_flat_indices = flat_indices[slice_idx]
+    squeezed = np.squeeze(scan_line_flat_indices, axis=0)  # Specify axis=1 to remove the size-1 middle dimension
+    indices = np.unravel_index(squeezed, (rows_num, cols_num))
+
+    print(indices)
+
+    l[indices] = slice_idx
+
+print(l)
