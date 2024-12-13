@@ -105,25 +105,27 @@ def main():
     plt.title('Right Image')
     plt.savefig('outputs/dp_labeling_map.jpg')
 
-    # # Generate a dictionary which maps each direction to a label map:
-    # tt = tic()
-    # direction_to_vote = solution.dp_labeling_per_direction(ssdd, COST1, COST2)
-    # print(f"Dynamic programming in all directions done in {toc(tt):.4f}"
-    #       f"[seconds]")
+    # Generate a dictionary which maps each direction to a label map:
+    tt = tic()
+    direction_to_vote = solution.dp_labeling_per_direction(ssdd, COST1, COST2)
+    print(f"Dynamic programming in all directions done in {toc(tt):.4f}"
+          f"[seconds]")
 
-    # # Plot all directions as well as the image, in the center of the plot:
-    # plt.figure()
-    # for i in range(1, 1 + 9):
-    #     plt.subplot(3, 3, i)
-    #     if i < 5:
-    #         plt.imshow(direction_to_vote[i])
-    #         plt.title(f'Direction {i}')
-    #     elif i == 5:
-    #         plt.imshow(left_image)
-    #         plt.title(f'Left Image')
-    #     else:
-    #         plt.imshow(direction_to_vote[i - 1])
-    #         plt.title(f'Direction {i - 1}')
+    # Plot all directions as well as the image, in the center of the plot:
+    plt.figure()
+    for i in range(1, 1 + 9):
+        plt.subplot(3, 3, i)
+        if i < 5:
+            plt.imshow(direction_to_vote[i])
+            plt.title(f'Direction {i}')
+        elif i == 5:
+            plt.imshow(left_image)
+            plt.title(f'Left Image')
+        else:
+            plt.imshow(direction_to_vote[i - 1])
+            plt.title(f'Direction {i - 1}')
+
+    plt.savefig('outputs/dp_labeling_per_direction.jpg')
 
     # Smooth disparity image - Semi-Global Mapping
     tt = tic()

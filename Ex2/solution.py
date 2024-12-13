@@ -203,8 +203,27 @@ class Solution:
         """
         num_of_directions = 8
         l = np.zeros_like(ssdd_tensor)
-        direction_to_slice = {}
+        direction_to_slice = {}            
         """INSERT YOUR CODE HERE"""
+        rows_num, cols_num = ssdd_tensor.shape[:2]
+        flat_indices = np.arange(0, rows_num * cols_num).reshape((rows_num, cols_num, 1))
+
+        for direction in range(1, num_of_directions + 1):
+            l = np.zeros_like(ssdd_tensor)
+            direction_slices = self.scan_slices(ssdd_tensor, direction)
+            direction_flat_indices = self.scan_slices(flat_indices, direction)
+
+            for slice_idx, c_slice in enumerate(direction_slices):
+                slice_indices = np.unravel_index(
+                    np.squeeze(direction_flat_indices[slice_idx], axis=0),
+                    (rows_num, cols_num)
+                )
+
+                l_slice = self.dp_grade_slice(c_slice, p1, p2).T 
+                l[slice_indices] = l_slice
+            
+            direction_to_slice[direction] = self.naive_labeling(l)
+
         return direction_to_slice
 
     def sgm_labeling(self, ssdd_tensor: np.ndarray, p1: float, p2: float):
@@ -236,8 +255,7 @@ class Solution:
         rows_num, cols_num = ssdd_tensor.shape[:2]
         flat_indices = np.arange(0, rows_num * cols_num).reshape((rows_num, cols_num, 1))
 
-        for i in range(num_of_directions):
-            direction = i + 1
+        for i, direction in enumerate(range(1, num_of_directions + 1)):
             direction_slices = self.scan_slices(ssdd_tensor, direction)
             direction_flat_indices = self.scan_slices(flat_indices, direction)
 
