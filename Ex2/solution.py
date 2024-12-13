@@ -105,7 +105,7 @@ class Solution:
             second_neighbors = p2 + np.repeat(np.min(prev_col), num_labels)
             min_costs = np.min(np.array([prev_col, left_neighbor, right_neighbor, second_neighbors]), axis=0)
             
-            l_slice[:, col] = c_slice[:, col] + min_costs[:] - np.min(prev_col)
+            l_slice[:, col] = c_slice[:, col] + min_costs - np.min(prev_col)
 
         return l_slice
 
