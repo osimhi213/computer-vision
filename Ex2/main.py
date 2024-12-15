@@ -68,11 +68,27 @@ def main():
     fig = plt.figure()
     plt.subplot(1, 2, 1)
     plt.imshow(left_image)
+    plt.title('Source Image')
     plt.subplot(1, 2, 2)
     plt.imshow(label_map)
     plt.colorbar()
     plt.title('Naive Depth')
     plt.savefig('outputs/naive_labeling.jpg')
+
+    # Compute forward map of the left image to the right image.
+    mapped_image_no_smooth_naive = forward_map(left_image, labels=label_map)
+    # plot left image, forward map image and right image
+    plt.figure()
+    plt.subplot(1, 3, 1)
+    plt.imshow(left_image)
+    plt.title('Source Image')
+    plt.subplot(1, 3, 2)
+    plt.imshow(mapped_image_no_smooth_naive)
+    plt.title('Forward map - Naive')
+    plt.subplot(1, 3, 3)
+    plt.imshow(right_image)
+    plt.title('Right Image')
+    plt.savefig('outputs/naive_labeling_map.jpg')
 
     # Smooth disparity image - Dynamic Programming
     tt = tic()
