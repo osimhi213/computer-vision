@@ -35,13 +35,13 @@ class Solution:
         """INSERT YOUR CODE HERE"""
         assert win_size % 2 == 1, f'win_size has to be an odd number, got {win_size}'
 
-        pad_width = [(0, 0)] * len(left_image.shape)
-        pad_width[1] = (dsp_range, dsp_range)
-        right_image_padded = np.pad(right_image, pad_width=tuple(pad_width))
+        pad_width = [(0, 0), (dsp_range, dsp_range)] + [(0, 0)] * (len(right_image.shape) - 2)
+        right_image_padded = np.pad(right_image, pad_width)
 
         for i, disp in enumerate(disparity_values):
             x_d = dsp_range + disp
             images_diff = left_image - right_image_padded[:, x_d:x_d+num_of_cols]
+            # FIXME - maybe we need to convert to grayscale
             images_square_diff = np.sum(images_diff ** 2, axis=2)
             sum_operator = np.ones((win_size, win_size))
             ssd = convolve2d(images_square_diff, sum_operator, mode='same')
