@@ -138,9 +138,9 @@ class Solution:
         return self.naive_labeling(l)
 
     def scan_diagonals(self, tensor, direction) -> np.ndarray:
-        rows_num, cols_num = tensor.shape[:2]
-        offset_min = -rows_num + 1
-        offset_max = cols_num - 1
+        num_of_rows, num_of_cols = tensor.shape[:2]
+        offset_min = -num_of_rows + 1
+        offset_max = num_of_cols - 1
         slices = []
 
         for offset in range(offset_min, offset_max + 1):
@@ -205,8 +205,8 @@ class Solution:
         l = np.zeros_like(ssdd_tensor)
         direction_to_slice = {}            
         """INSERT YOUR CODE HERE"""
-        rows_num, cols_num = ssdd_tensor.shape[:2]
-        flat_indices = np.arange(0, rows_num * cols_num).reshape((rows_num, cols_num, 1))
+        num_of_rows, num_of_cols = ssdd_tensor.shape[:2]
+        flat_indices = np.arange(0, num_of_rows * num_of_cols).reshape((num_of_rows, num_of_cols, 1))
 
         for direction in range(1, num_of_directions + 1):
             l = np.zeros_like(ssdd_tensor)
@@ -216,7 +216,7 @@ class Solution:
             for slice_idx, c_slice in enumerate(direction_slices):
                 slice_indices = np.unravel_index(
                     np.squeeze(direction_flat_indices[slice_idx], axis=0),
-                    (rows_num, cols_num)
+                    (num_of_rows, num_of_cols)
                 )
 
                 l_slice = self.dp_grade_slice(c_slice, p1, p2).T 
@@ -252,8 +252,8 @@ class Solution:
         l = np.zeros_like(ssdd_tensor)
         """INSERT YOUR CODE HERE"""
         l_direction_tensors = np.zeros((num_of_directions, *ssdd_tensor.shape))
-        rows_num, cols_num = ssdd_tensor.shape[:2]
-        flat_indices = np.arange(0, rows_num * cols_num).reshape((rows_num, cols_num, 1))
+        num_of_rows, num_of_cols = ssdd_tensor.shape[:2]
+        flat_indices = np.arange(0, num_of_rows * num_of_cols).reshape((num_of_rows, num_of_cols, 1))
 
         for i, direction in enumerate(range(1, num_of_directions + 1)):
             direction_slices = self.scan_slices(ssdd_tensor, direction)
@@ -262,7 +262,7 @@ class Solution:
             for slice_idx, c_slice in enumerate(direction_slices):
                 slice_indices = np.unravel_index(
                     np.squeeze(direction_flat_indices[slice_idx], axis=0),
-                    (rows_num, cols_num)
+                    (num_of_rows, num_of_cols)
                 )
 
                 l_slice = self.dp_grade_slice(c_slice, p1, p2).T 
