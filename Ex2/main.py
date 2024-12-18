@@ -7,8 +7,8 @@ from solution import Solution
 
 
 COST1 = 0.5
-COST2 = 20.0
-WIN_SIZE = 5
+COST2 = 3.0
+WIN_SIZE = 3
 DISPARITY_RANGE = 30
 ##########################################################
 # Don't forget to fill in your IDs!!!
