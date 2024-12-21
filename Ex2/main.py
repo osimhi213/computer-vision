@@ -189,7 +189,7 @@ def main():
     plt.imshow(label_map)
     plt.title('Naive Depth')
     plt.subplot(1, 2, 2)
-    plt.imshow(mapped_image_smooth_sgm)
+    plt.imshow(label_smooth_sgm)
     plt.title('Smooth Depth - SGM')
     plt.savefig('outputs/depth_compare_sgm.jpg')
 
