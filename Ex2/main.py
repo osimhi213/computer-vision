@@ -202,7 +202,16 @@ def main():
     DISPARITY_RANGE = 30  # YOU MAY CHANGE THIS
 
     your_left_image, your_right_image = load_data(is_your_data=True)
-    print(your_left_image.shape, your_right_image.shape)
+
+    plt.figure()
+    plt.subplot(1, 2, 1)
+    plt.imshow(your_left_image)
+    plt.title('Your Source Image')
+    plt.subplot(1, 2, 2)
+    plt.imshow(your_right_image)
+    plt.title('Your Right Image')
+    plt.savefig('outputs/test_images.jpg')
+
     solution = Solution()
     # Compute Sum-Square-Diff distance
     tt = tic()
