@@ -41,7 +41,6 @@ class Solution:
         for i, disp in enumerate(disparity_values):
             x_d = dsp_range + disp
             images_diff = left_image - right_image_padded[:, x_d:x_d+num_of_cols]
-            # FIXME - maybe we need to convert to grayscale
             images_square_diff = np.sum(images_diff ** 2, axis=2)
             sum_operator = np.ones((win_size, win_size))
             ssd = convolve2d(images_square_diff, sum_operator, mode='same')
