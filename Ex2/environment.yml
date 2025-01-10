@@ -180,4 +180,4 @@ dependencies:
     - pillow==8.3.1
     - pylint==2.9.5
     - wrapt==1.12.1
-prefix: /home/ofeksimhi/miniconda3/envs/cv-ex2
+cc
