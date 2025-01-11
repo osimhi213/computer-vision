@@ -26,18 +26,22 @@ class FacesDataset(Dataset):
     def __getitem__(self, index: int) -> tuple[torch.Tensor, int]:
         """Get a sample and label from the dataset."""
         """INSERT YOUR CODE HERE, overrun return."""
-        if index < 0 or index >= len(self):
-            raise ValueError(f'Index: {index} out of bounds')
+        num_real = len(self.real_image_names)
 
-        num_of_real_images = len(self.real_image_names)
-        if index < num_of_real_images:
+        if index < 0 or index >= len(self):
+            raise IndexError(f"Index {index} is out of bounds for dataset with size {len(self)}.")
+
+        if index < num_real:
+            folder = 'real'
             img_name = self.real_image_names[index]
             label = 0
         else:
-            img_name = self.fake_image_names[index - num_of_real_images]
+            folder = 'fake'
+            img_name = self.fake_image_names[index - num_real]
             label = 1
-       
-        image = Image.open(img_name)
+
+        img_path = os.path.join(self.root_path, folder, img_name)
+        image = Image.open(img_path)
         if self.transform:
             image = self.transform(image)
 
