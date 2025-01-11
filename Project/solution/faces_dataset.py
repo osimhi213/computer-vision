@@ -32,20 +32,20 @@ class FacesDataset(Dataset):
             raise IndexError(f"Index {index} is out of bounds for dataset with size {len(self)}.")
 
         if index < num_real:
-            folder = 'real'
             img_name = self.real_image_names[index]
+            folder = 'real'
             label = 0
         else:
-            folder = 'fake'
             img_name = self.fake_image_names[index - num_real]
+            folder = 'fake'
             label = 1
 
         img_path = os.path.join(self.root_path, folder, img_name)
-        image = Image.open(img_path)
-        if self.transform:
-            image = self.transform(image)
+        img = Image.open(img_path)
+        if self.transform is not None:
+            img = self.transform(img)
 
-        return image, label
+        return img, label
 
     def __len__(self):
         """Return the number of images in the dataset."""
