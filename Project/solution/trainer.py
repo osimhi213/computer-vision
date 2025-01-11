@@ -61,6 +61,32 @@ class Trainer:
 
         for batch_idx, (inputs, targets) in enumerate(train_dataloader):
             """INSERT YOUR CODE HERE."""
+            # move data to the same device as the model was loaded
+            inputs, targets = inputs.to(device), targets.to(device)
+
+            # zero the gradients
+            self.optimizer.zero_grad()
+
+            # forward
+            outputs = self.model(inputs)
+
+            # loss
+            loss = self.criterion(outputs, targets)
+
+            # backpropagation
+            loss.backward()
+
+            # optimizer step
+            self.optimizer.step()
+
+            total_loss += loss.item()
+            _, predictions = torch.max(outputs, dim=1)
+            correct_labeled_samples += (predictions == targets).sum().item()
+            nof_samples += targets.size(0)
+
+            avg_loss = total_loss / (batch_idx + 1)
+            accuracy = (correct_labeled_samples / nof_samples) * 100
+
             if batch_idx % print_every == 0 or \
                     batch_idx == len(train_dataloader) - 1:
                 print(f'Epoch [{self.epoch:03d}] | Loss: {avg_loss:.3f} | '
