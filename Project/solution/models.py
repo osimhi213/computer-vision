@@ -42,8 +42,7 @@ def get_xception_based_model() -> nn.Module:
     classification head stated in the exercise.
     """
     """INSERT YOUR CODE HERE, overrun return."""
-    pretrained = False
-    num_classes = 2
+    pretrained = True
     custom_network = build_xception_backbone(pretrained)
     head = nn.Sequential(
         nn.Linear(2048, 1000),
@@ -52,7 +51,7 @@ def get_xception_based_model() -> nn.Module:
         nn.ReLU(),
         nn.Linear(256, 64),
         nn.ReLU(),
-        nn.Linear(64, num_classes)
+        nn.Linear(64, 2)
     )
     custom_network.fc = head
 
