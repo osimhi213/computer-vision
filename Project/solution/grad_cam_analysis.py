@@ -1,10 +1,11 @@
 """Show network train graphs and analyze training results."""
 import os
 import argparse
-
+ 
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
+from pytorch_grad_cam import GradCAM
 
 from torch.utils.data import DataLoader
 
@@ -52,7 +53,14 @@ def get_grad_cam_visualization(test_dataset: torch.utils.data.Dataset,
         of batch size 1, it's a tensor of shape (1,)).
     """
     """INSERT YOUR CODE HERE, overrun return."""
-    return np.random.rand(256, 256, 3), torch.randint(0, 2, (1,))
+    sample, true_label = next(iter(DataLoader(test_dataset,
+                                            batch_size=1,
+                                            shuffle=True)))
+    grad_cam = GradCAM(model, [model.conv3])
+    visualization = grad_cam.forward(sample, None)
+    visualization = np.transpose(visualization, (1, 2, 0))
+
+    return visualization, true_label
 
 
 def main():
