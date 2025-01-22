@@ -57,7 +57,7 @@ class Trainer:
         train_dataloader = DataLoader(self.train_dataset,
                                       self.batch_size,
                                       shuffle=True)
-        print_every = int(len(train_dataloader) / 10)
+        print_every = 10 #int(len(train_dataloader) / 10)
 
         for batch_idx, (inputs, targets) in enumerate(train_dataloader):
             """INSERT YOUR CODE HERE."""
@@ -115,7 +115,7 @@ class Trainer:
         accuracy = 0
         nof_samples = 0
         correct_labeled_samples = 0
-        print_every = max(int(len(dataloader) / 10), 1)
+        print_every = 10 #max(int(len(dataloader) / 10), 1)
 
         for batch_idx, (inputs, targets) in enumerate(dataloader):
             """INSERT YOUR CODE HERE."""
