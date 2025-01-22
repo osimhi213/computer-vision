@@ -66,16 +66,14 @@ def compute_gradient_saliency_maps(samples: torch.tensor,
     samples.requires_grad_()
 
     # 2
-    scores = model(samples)
-    predictions = torch.argmax(scores, dim=1)
-    
+    outputs = model(samples)
+
     # 3
-    scores = scores[predictions == true_labels]
+    scores = outputs.gather(1, true_labels.view(-1, 1)).squeeze()
 
     # 4
     model.zero_grad()
-    # scores.backward(torch.ones_like(scores))
-    scores.backward()
+    scores.backward(torch.ones_like(scores))
 
     # 5
     w = samples.grad
