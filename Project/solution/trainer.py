@@ -198,6 +198,7 @@ class Trainer:
         model_filename = f"{logging_parameters.dataset_name}_" \
                          f"{logging_parameters.model_name}_" \
                          f"{logging_parameters.optimizer_name}.pt"
+        os.makedirs(CHECKPOINT_DIR)
         checkpoint_filename = os.path.join(CHECKPOINT_DIR, model_filename)
         for self.epoch in range(1, epochs + 1):
             print(f'Epoch {self.epoch}/{epochs}')
@@ -222,6 +223,8 @@ class Trainer:
                     'test_acc': test_acc,
                     'epoch': self.epoch,
                 }
+                print('!'*10)
+                print(os.getcwd())
                 torch.save(state, checkpoint_filename)
                 best_acc = val_acc
         self.write_output(logging_parameters, output_data)

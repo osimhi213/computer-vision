@@ -43,8 +43,7 @@ def load_dataset(dataset_name: str, dataset_part: str) -> \
                  'val': TRANSFORM_TEST,
                  'test': TRANSFORM_TEST}[dataset_part]
     dataset = FacesDataset(
-        root_path=os.path.join('..',
-                               'Assignment4_datasets',
+        root_path=os.path.join('Assignment4_datasets',
                                dataset_name,
                                dataset_part),
         transform=transform)
