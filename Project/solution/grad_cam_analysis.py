@@ -59,8 +59,10 @@ def get_grad_cam_visualization(test_dataset: torch.utils.data.Dataset,
                                             batch_size=1,
                                             shuffle=True)))
     grad_cam = GradCAM(model, [model.conv3])
-    visualization = grad_cam.forward(sample, None)
-    visualization = np.transpose(visualization, (1, 2, 0))
+    grayscale_cam = grad_cam(input_tensor=sample, targets=[ClassifierOutputTarget(true_label.item())])
+    sample = sample.squeeze().permute(1, 2, 0).cpu().numpy()
+    sample_norm = (sample - sample.min()) / (sample.max() - sample.min())
+    visualization = show_cam_on_image(sample_norm, grayscale_cam[0], use_rgb=True)
 
     return visualization, true_label
 
