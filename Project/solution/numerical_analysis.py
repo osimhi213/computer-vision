@@ -66,7 +66,7 @@ def get_soft_scores_and_true_labels(dataset, model):
                             batch_size=4,
                             shuffle=False)
 
-    for batch_idx, (inputs, targets) in enumerate(dataloader):
+    for (inputs, targets) in dataloader:
         inputs, targets = inputs.to(device), targets.to(device)
   
         with torch.no_grad():
