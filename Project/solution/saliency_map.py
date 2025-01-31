@@ -62,6 +62,8 @@ def compute_gradient_saliency_maps(samples: torch.tensor,
         shape Bx256x256 where B is the number of images in samples.
     """
     """INSERT YOUR CODE HERE, overrun return."""
+    EPS = 1e-7
+
     # 1
     samples.requires_grad_()
 
@@ -80,6 +82,9 @@ def compute_gradient_saliency_maps(samples: torch.tensor,
 
     # 6 + 7
     saliency = torch.max(torch.abs(w), dim=1)[0]
+
+    # A small correction for zero-division
+    saliency[:, 0, 0] += EPS
 
     return saliency
 
